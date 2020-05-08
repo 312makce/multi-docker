@@ -1,0 +1,22 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t makce/reac-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run makce/react-test npm test -- --coverage
+
+
+after_success:
+  - docker build -t makce/multi-client ./client
+  - docker build -t makce/multi-nginx ./nginx
+  - docker build -t makce/multi-server ./server
+  - docker build -t makce/multo-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push makce/multi-client ./client
+  - docker push makce/multi-nginx ./nginx
+  - docker push makce/multi-server ./server
+  - docker push makce/multi-worker ./worker
+
